@@ -1,0 +1,23 @@
+question3: 
+
+
+
+
+ward(*WardID*, WardName)
+
+patient(*PatID*, PatName, BirthDate, ***WardID***)
+
+nurse(*NurseID*, NurseName, HomeAddress, ***WardID***)
+
+consultant(*ConsID*, ConsName)
+
+drug(*DrugCode*, StandardDose)
+
+drug_label(***DrugCode, LabelName***)
+
+consultant_checks_patient(***ConsID, PatID***)
+
+nurse_administers(
+    ***NurseID, DrugCode, PatID, AdminDate, AdminTime***,
+    GivenDose
+)

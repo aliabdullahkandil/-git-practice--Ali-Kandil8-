@@ -1,0 +1,17 @@
+question 1: 
+
+musician(*MusID*, FirstName, LastName, Street, City, PhoneNum)
+
+instrument(*InstrID*, InstrName, Category)
+
+album(*AlbID*, AlbumTitle, ProducerName)
+
+song(*SongID*, SongTitle, ReleaseDate)
+
+musician_plays_instr(***MusID, InstrID***)
+
+musician_makes_album(***MusID, AlbID***)
+
+song_in_album(***SongID, AlbID***)
+
+musician_performs_song(***MusID, SongID***)

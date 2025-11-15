@@ -1,0 +1,16 @@
+question 2:
+
+
+owner(*OwnerID*, OwnerName)
+
+property(*PropID*, PropName, Address, ***OwnerID***)
+
+employee(*EmpID*, FullName, ***OfficeID***)
+
+office(*OfficeID*, OfficeNum, Town, Province, PostalCode)
+
+property_listed_at(***PropID, OfficeID***)
+
+property_supervised_by(***PropID, EmpID***)
+
+ownership_share(***OwnerID, PropID***, SharePercent)
