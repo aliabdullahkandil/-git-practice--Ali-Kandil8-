@@ -1,0 +1,52 @@
+CREATE DATABASE BarwonHealthDB;
+GO
+USE BarwonHealthDB;
+GO
+
+CREATE TABLE Doctor (
+    DoctorID INT PRIMARY KEY,
+    Name VARCHAR(100) NOT NULL,
+    Email VARCHAR(100),
+    Phone VARCHAR(20),
+    Specialty VARCHAR(100),
+    YearsExperience INT
+);
+
+CREATE TABLE PharmaCompany (
+    CompanyID INT PRIMARY KEY,
+    Name VARCHAR(100) NOT NULL,
+    Address VARCHAR(200),
+    Phone VARCHAR(20)
+);
+
+CREATE TABLE Drug (
+    DrugID INT PRIMARY KEY,
+    TradeName VARCHAR(100) NOT NULL,
+    Strength VARCHAR(50),
+    CompanyID INT NOT NULL,
+    FOREIGN KEY (CompanyID) REFERENCES PharmaCompany(CompanyID) ON DELETE CASCADE
+);
+
+CREATE TABLE Patient (
+    URNumber INT PRIMARY KEY,
+    Name VARCHAR(100) NOT NULL,
+    Address VARCHAR(200),
+    Age INT,
+    Email VARCHAR(100),
+    Phone VARCHAR(20),
+    MedicareNumber VARCHAR(50),
+    PrimaryDoctorID INT NOT NULL,
+    FOREIGN KEY (PrimaryDoctorID) REFERENCES Doctor(DoctorID)
+);
+
+CREATE TABLE Prescription (
+    PrescriptionID INT PRIMARY KEY,
+    Date DATE NOT NULL,
+    Quantity INT NOT NULL,
+    URNumber INT NOT NULL,
+    DoctorID INT NOT NULL,
+    DrugID INT NOT NULL,
+    FOREIGN KEY (URNumber) REFERENCES Patient(URNumber),
+    FOREIGN KEY (DoctorID) REFERENCES Doctor(DoctorID),
+    FOREIGN KEY (DrugID) REFERENCES Drug(DrugID)
+);
