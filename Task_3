@@ -1,0 +1,108 @@
+using System;
+using System.Collections.Generic;
+using System.Linq;
+
+namespace Task_3
+{
+    public class Book
+    {
+        public string Title { get; set; }
+        public string Author { get; set; }
+        public string ISBN { get; set; }
+        public bool Availability { get; set; }
+
+        public Book(string title, string author, string isbn)
+        {
+            Title = title;
+            Author = author;
+            ISBN = isbn;
+            Availability = true;
+        }
+    }
+
+    public class Library
+    {
+        private List<Book> collection;
+
+        public Library()
+        {
+            collection = new List<Book>();
+        }
+
+        public void AddBook(Book book)
+        {
+            collection.Add(book);
+            Console.WriteLine($"Book '{book.Title}' added successfully.");
+        }
+
+        public Book SearchBook(string keyword)
+        {
+            return collection.FirstOrDefault(b => b.Title.Contains(keyword, StringComparison.OrdinalIgnoreCase)
+                                              || b.Author.Contains(keyword, StringComparison.OrdinalIgnoreCase));
+        }
+
+        public bool BorrowBook(string isbn)
+        {
+            Book book = collection.FirstOrDefault(b => b.ISBN == isbn);
+            if (book != null && book.Availability)
+            {
+                book.Availability = false;
+                Console.WriteLine($"You borrowed '{book.Title}'.");
+                return true;
+            }
+            Console.WriteLine("Book not available.");
+            return false;
+        }
+
+        public bool ReturnBook(string isbn)
+        {
+            Book book = collection.FirstOrDefault(b => b.ISBN == isbn);
+            if (book != null && !book.Availability)
+            {
+                book.Availability = true;
+                Console.WriteLine($"You returned '{book.Title}'.");
+                return true;
+            }
+            Console.WriteLine("Book was not borrowed.");
+            return false;
+        }
+    }
+
+    internal class Program
+    {
+        static void Main(string[] args)
+        {
+            Library myLibrary = new Library();
+
+            myLibrary.AddBook(new Book("The Alchemist", "Paulo Coelho", "12345"));
+            myLibrary.AddBook(new Book("1984", "George Orwell", "67890"));
+
+            var searchResult = myLibrary.SearchBook("1984");
+            if (searchResult != null)
+                Console.WriteLine($"Found book: {searchResult.Title} by {searchResult.Author}");
+
+            myLibrary.BorrowBook("12345");
+
+            myLibrary.ReturnBook("12345");
+
+            Console.WriteLine("Press any key to exit...");
+            Console.ReadKey();
+        }
+    }
+}
+
+Search Task
+Struct vs Class:
+
+Use a struct for small, immutable, value-type data that has short lifetime and doesn’t require inheritance (e.g., Point, Color).
+
+Use a class for reference-type objects, larger data, or when you need inheritance/polymorphism.
+
+Record vs Struct vs Class:
+
+Struct: value type, efficient, no inheritance, mutable/immutable.
+
+Class: reference type, supports inheritance, mutable by default.
+
+Record: reference type (or value type with record struct), immutable by default, optimized for data storage and equality comparison.
+
