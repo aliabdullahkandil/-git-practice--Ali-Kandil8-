@@ -1,0 +1,308 @@
+using System;
+using System.Collections.Generic;
+using System.Linq;
+
+enum QuestionLevel
+{
+    Easy = 1,
+    Medium,
+    Hard
+}
+
+abstract class Question
+{
+    public string Header { get; set; }
+    public int Marks { get; set; }
+    public QuestionLevel Level { get; set; }
+
+    public Question(string header, int marks, QuestionLevel level)
+    {
+        Header = header;
+        Marks = marks;
+        Level = level;
+    }
+
+    public abstract void Display();
+    public abstract bool CheckAnswer(string answer);
+}
+
+class TrueFalseQuestion : Question
+{
+    public bool CorrectAnswer { get; set; }
+
+    public TrueFalseQuestion(string header, int marks, QuestionLevel level, bool correctAnswer)
+        : base(header, marks, level)
+    {
+        CorrectAnswer = correctAnswer;
+    }
+
+    public override void Display()
+    {
+        Console.WriteLine(Header);
+        Console.WriteLine("1- True");
+        Console.WriteLine("2- False");
+    }
+
+    public override bool CheckAnswer(string answer)
+    {
+        if (answer != "1" && answer != "2") return false;
+        bool studentAnswer = answer == "1";
+        return studentAnswer == CorrectAnswer;
+    }
+}
+
+class ChooseOneQuestion : Question
+{
+    public List<string> Choices { get; set; }
+    public int CorrectChoice { get; set; }
+
+    public ChooseOneQuestion(string header, int marks, QuestionLevel level, List<string> choices, int correctChoice)
+        : base(header, marks, level)
+    {
+        Choices = choices;
+        CorrectChoice = correctChoice;
+    }
+
+    public override void Display()
+    {
+        Console.WriteLine(Header);
+        for (int i = 0; i < Choices.Count; i++)
+            Console.WriteLine($"{i + 1}- {Choices[i]}");
+    }
+
+    public override bool CheckAnswer(string answer)
+    {
+        if (!int.TryParse(answer, out int result)) return false;
+        return result == CorrectChoice;
+    }
+}
+
+class MultipleChoiceQuestion : Question
+{
+    public List<string> Choices { get; set; }
+    public List<int> CorrectChoices { get; set; }
+
+    public MultipleChoiceQuestion(string header, int marks, QuestionLevel level, List<string> choices, List<int> correctChoices)
+        : base(header, marks, level)
+    {
+        Choices = choices;
+        CorrectChoices = correctChoices.Distinct().OrderBy(x => x).ToList();
+    }
+
+    public override void Display()
+    {
+        Console.WriteLine(Header);
+        for (int i = 0; i < Choices.Count; i++)
+            Console.WriteLine($"{i + 1}- {Choices[i]}");
+        Console.WriteLine("Enter answers separated by comma:");
+    }
+
+    public override bool CheckAnswer(string answer)
+    {
+        try
+        {
+            var studentAnswers = answer
+                .Split(',')
+                .Select(x => int.Parse(x.Trim()))
+                .Distinct()
+                .OrderBy(x => x)
+                .ToList();
+
+            return studentAnswers.SequenceEqual(CorrectChoices);
+        }
+        catch
+        {
+            return false;
+        }
+    }
+}
+
+class Program
+{
+    static List<Question> QuestionBank = new List<Question>();
+    static Random random = new Random();
+
+    static void Main()
+    {
+        while (true)
+        {
+            Console.WriteLine("\n1- Doctor Mode");
+            Console.WriteLine("2- Student Mode");
+            Console.WriteLine("3- Exit");
+
+            if (!int.TryParse(Console.ReadLine(), out int choice))
+                continue;
+
+            if (choice == 1)
+                DoctorMode();
+            else if (choice == 2)
+                StudentMode();
+            else if (choice == 3)
+                break;
+        }
+    }
+
+    static void DoctorMode()
+    {
+        Console.Write("Enter number of questions: ");
+        if (!int.TryParse(Console.ReadLine(), out int count) || count <= 0)
+            return;
+
+        for (int i = 0; i < count; i++)
+        {
+            Console.WriteLine("Select Type: 1- True/False 2- Choose One 3- Multiple Choice");
+            if (!int.TryParse(Console.ReadLine(), out int type))
+                continue;
+
+            Console.WriteLine("Select Level: 1- Easy 2- Medium 3- Hard");
+            if (!int.TryParse(Console.ReadLine(), out int levelInput))
+                continue;
+
+            QuestionLevel level = (QuestionLevel)levelInput;
+
+            Console.Write("Enter Header: ");
+            string header = Console.ReadLine();
+
+            Console.Write("Enter Marks: ");
+            if (!int.TryParse(Console.ReadLine(), out int marks))
+                continue;
+
+            if (type == 1)
+            {
+                Console.Write("Correct Answer (1-True, 2-False): ");
+                bool correct = Console.ReadLine() == "1";
+                QuestionBank.Add(new TrueFalseQuestion(header, marks, level, correct));
+            }
+            else if (type == 2)
+            {
+                List<string> choices = new List<string>();
+                for (int j = 0; j < 4; j++)
+                {
+                    Console.Write($"Choice {j + 1}: ");
+                    choices.Add(Console.ReadLine());
+                }
+
+                Console.Write("Correct Choice Number: ");
+                if (!int.TryParse(Console.ReadLine(), out int correct))
+                    continue;
+
+                QuestionBank.Add(new ChooseOneQuestion(header, marks, level, choices, correct));
+            }
+            else if (type == 3)
+            {
+                List<string> choices = new List<string>();
+                for (int j = 0; j < 4; j++)
+                {
+                    Console.Write($"Choice {j + 1}: ");
+                    choices.Add(Console.ReadLine());
+                }
+
+                Console.Write("Correct Choices (comma separated): ");
+                try
+                {
+                    var correct = Console.ReadLine()
+                        .Split(',')
+                        .Select(x => int.Parse(x.Trim()))
+                        .ToList();
+
+                    QuestionBank.Add(new MultipleChoiceQuestion(header, marks, level, choices, correct));
+                }
+                catch
+                {
+                    continue;
+                }
+            }
+        }
+    }
+
+    static void StudentMode()
+    {
+        if (QuestionBank.Count == 0)
+        {
+            Console.WriteLine("No questions available.");
+            return;
+        }
+
+        Console.WriteLine("Select Exam Type: 1- Practical 2- Final");
+        if (!int.TryParse(Console.ReadLine(), out int examType))
+            return;
+
+        Console.WriteLine("Select Level: 1- Easy 2- Medium 3- Hard");
+        if (!int.TryParse(Console.ReadLine(), out int levelInput))
+            return;
+
+        QuestionLevel level = (QuestionLevel)levelInput;
+
+        var questions = QuestionBank
+            .Where(q => q.Level == level)
+            .OrderBy(q => random.Next())
+            .ToList();
+
+        if (questions.Count == 0)
+        {
+            Console.WriteLine("No questions for this level.");
+            return;
+        }
+
+        if (examType == 1)
+        {
+            int half = Math.Max(1, questions.Count / 2);
+            questions = questions.Take(half).ToList();
+        }
+
+        int totalMarks = questions.Sum(q => q.Marks);
+        int studentMarks = 0;
+
+        foreach (var question in questions)
+        {
+            Console.WriteLine();
+            question.Display();
+            string answer = Console.ReadLine();
+
+            if (question.CheckAnswer(answer))
+                studentMarks += question.Marks;
+        }
+
+        Console.WriteLine($"\nYour Result: {studentMarks} / {totalMarks}");
+    }
+}
+
+
+
+##Search Task
+
+----> protected internal:
+
+protected internal means the member is accessible:
+
+From anywhere inside the same assembly (project).
+
+From derived classes even if they are in a different assembly.
+
+So it is the combination of:
+
+protected
+
+internal
+
+Access rule:
+
+Same assembly → accessible
+Derived class in another assembly → accessible
+Non-derived class in another assembly → NOT accessible
+
+-----> private protected
+
+private protected means the member is accessible:
+
+Only inside the same assembly
+
+And only within derived classes
+
+So it is more restrictive than protected internal.
+
+Access rule:
+
+Same assembly + derived class → accessible
+Same assembly + non-derived class → NOT accessible
+Different assembly → NOT accessible
